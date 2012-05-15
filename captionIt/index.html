@@ -53,6 +53,24 @@
                 <b>/clear </b> clear chat history<br/>
                 <b>/nick name</b> change alias
             </p>
+
+<div id="container">
+  <div id="local">
+    <video
+     width="100%" height="100%" id="localVideo" autoplay="autoplay"
+     onclick="onClick()" style="opacity: 0;
+     -webkit-transition-property: opacity;
+     -webkit-transition-duration: 2s;">
+    </video>
+  </div>
+  <div id="remote">
+    <video width="100%" height="100%" id="remoteVideo" autoplay="autoplay"
+     style="opacity: 0;
+     -webkit-transition-property: opacity;
+     -webkit-transition-duration: 2s;">
+    </video>
+  </div>
+
     </div>
 </body>
 
@@ -181,6 +199,59 @@ $(function(){
         addMessage("disconnected");
     });
 });
+
+  var localVideo;
+  var remoteVideo;
+  var localStream;
+  var channel;
+  var channelReady = false;
+  var pc;
+  var initiator = 1;
+  var started = false;
+
+getUserMedia = function() {
+    try {
+      navigator.webkitGetUserMedia({audio:true, video:true}, onUserMediaSuccess,
+                                   onUserMediaError);
+      console.log("Requested access to local media with new syntax.");
+    } catch (e) {
+      try {
+        navigator.webkitGetUserMedia("video,audio", onUserMediaSuccess,
+                                     onUserMediaError);
+        console.log("Requested access to local media with old syntax.");
+      } catch (e) {
+        alert("webkitGetUserMedia() failed. Is the MediaStream flag enabled in about:flags?");
+        console.log("webkitGetUserMedia failed with exception: " + e.message);
+      }
+    }
+}
+
+onUserMediaSuccess = function(stream) {
+    console.log("User has granted access to local media.");
+    var url = webkitURL.createObjectURL(stream);
+    localVideo.style.opacity = 1;
+    localVideo.src = url;
+    localStream = stream;
+    if (initiator) maybeStart();
+  }
+  onUserMediaError = function(error) {
+    console.log("Failed to get access to local media. Error code was " + error.code);
+    alert("Failed to get access to local media. Error code was " + error.code + ".");
+  }
+
+
+
+initialize = function() {
+    console.log("Initializing.");
+    localVideo = document.getElementById("localVideo");
+    remoteVideo = document.getElementById("remoteVideo");
+    //openChannel();
+    getUserMedia();
+    //createPeerConnection();
+  }
+
+initialize();
+
 //--></script>
 
 </html>
